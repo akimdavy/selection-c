@@ -1,35 +1,33 @@
-import OBR from "@owlbear-rodeo/sdk";
+import OBR from "https://unpkg.com/@owlbear-rodeo/sdk/dist/index.mjs";
 
-const KEY_IS_MONSTER = "com.battle-system.clash/clash_isMonster";
+const CLASH_IS_MONSTER = "com.battle-system.clash/clash_isMonster";
 
-async function markSelectionAsMonsters() {
-  const ids = await OBR.player.getSelection(); // :contentReference[oaicite:2]{index=2}
-  if (!ids?.length) {
-    console.log("[ClashMonsterHotkey] No selection");
-    return;
-  }
+OBR.onReady(async () => {
+  // Кнопка/экшен в тулбаре + хоткей "C"
+  await OBR.tool.createAction({
+    id: "selection-c.mark-monster",
+    shortcut: "C",
+    icons: [
+      {
+        icon: "/icon.svg",
+        label: "Mark as Monster (C)"
+      }
+    ],
+    onClick: async () => {
+      const ids = await OBR.player.getSelection();
+      if (!ids?.length) return;
 
-  const items = await OBR.scene.items.getItems(ids); // :contentReference[oaicite:3]{index=3}
-  if (!items.length) return;
+      // Важно: работает только если у тебя есть права на изменение токенов
+      await OBR.scene.items.updateItems(ids, (items) => {
+        for (const it of items) {
+          it.metadata ??= {};
+          it.metadata[CLASH_IS_MONSTER] = true;
+        }
+      });
 
-  await OBR.scene.items.updateItems(items, (drafts) => { // :contentReference[oaicite:4]{index=4}
-    for (const it of drafts) {
-      it.metadata = it.metadata || {};
-      it.metadata[KEY_IS_MONSTER] = true;
+      console.log("[selection-c] Marked as monsters:", ids);
     }
   });
 
-  console.log("[ClashMonsterHotkey] Marked monsters:", items.map((i) => i.id));
-}
-
-OBR.onReady(async () => {
-  // Tool Action справа в тулбаре + хоткей "C" :contentReference[oaicite:5]{index=5}
-  await OBR.tool.createAction({
-    id: "clash-monster-hotkey.mark",
-    shortcut: "C",
-    icons: [{ icon: "/icon.svg", label: "Mark Monsters (C)" }],
-    onClick: () => markSelectionAsMonsters(),
-  });
-
-  console.log("[ClashMonsterHotkey] Ready. Select tokens and press C.");
+  console.log('[selection-c] Ready. Press "C" to mark selected tokens as monsters.');
 });
