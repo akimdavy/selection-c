@@ -1,0 +1,9 @@
+{
+  "name": "Clash Monster Hotkey",
+  "version": "1.0.0",
+  "author": "You",
+  "description": "Press C to mark selected tokens as monsters for Clash",
+  "permissions": ["READ_SCENE", "WRITE_SCENE"],
+  "icon": "icon.svg",
+  "entry": "index.html"
+}
